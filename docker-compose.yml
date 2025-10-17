@@ -1,30 +1,69 @@
+version: '3.9'
+
 services:
-  postgres:
-    image: postgres:16
-    container_name: call-db
-    restart: unless-stopped
+  # Using existing external containers
+  # postgres: call-db (external)
+  # redis: syncoria2-redis-1 (external)
+
+  livekit:
+    build:
+      context: ./services/livekit
+      dockerfile: Dockerfile
+    ports:
+      - "7880:7880"    # WebSocket/HTTP
+      - "7881:7881"    # WebRTC TCP
+      - "7882:7882/udp" # WebRTC UDP
+      - "51000-51200:51000-51200/udp" # WebRTC UDP range
+    volumes:
+      - ./services/livekit/livekit-simple.yaml:/etc/livekit.yaml
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-call}
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      LIVEKIT_CONFIG: /etc/livekit.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: --config /etc/livekit.yaml
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+  backend:
+    build:
+      context: .
+      dockerfile: services/backend/Dockerfile
+    ports: ["1285:1285"]
     volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+      - ./services/backend:/app
+      - ./packages:/app/packages
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5434/call
+      REDIS_HOST: host.docker.internal
+      REDIS_PORT: 6379
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      CLERK_WEBHOOK_SECRET: ${CLERK_WEBHOOK_SECRET}
+    depends_on:
+      livekit:
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-volumes:
-  postgres-data:
-    name: call-postgres-data
+  web:
+    build:
+      context: .
+      dockerfile: services/web/Dockerfile
+      target: dev
+    ports: ["3000:3000"]
+    volumes:
+      - ./services/web:/app
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:1285
+      NEXT_PUBLIC_LIVEKIT_URL: ws://localhost:7880
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    depends_on:
+      - backend
+      - livekit
+
+# Using external containers for postgres and redis
+# No volumes needed for this setup
