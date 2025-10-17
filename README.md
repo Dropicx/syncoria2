@@ -1,293 +1,199 @@
-# Call
+# Syncoria2 🎥
 
-An Open-source AI-native alternative to Google Meet and Zoom
+A modern, real-time video/audio conferencing application built with Next.js, Hono, and LiveKit.
 
-Ready to escape complex, data-hungry meeting apps? Join the future of video calling.
+## 🚀 Features
 
-- [Website](https://joincall.co)
-- [GitHub](https://github.com/joincalldotco/call)
-- [Discord](https://discord.com/invite/bre4echNxB)
-- [Twitter](https://x.com/joincalldotco)
+- **Real-time Video/Audio Calls** - Powered by LiveKit for high-quality WebRTC communication
+- **Modern Tech Stack** - Next.js 15, Hono, TypeScript, and Tailwind CSS
+- **Docker Ready** - Complete containerization with Docker Compose
+- **Authentication** - Secure user management with Clerk
+- **Team Management** - Create teams, manage contacts, and schedule calls
+- **Responsive Design** - Beautiful UI that works on all devices
 
----
+## 🏗️ Architecture
 
-## Features
+```
+syncoria2/
+├── services/
+│   ├── web/          # Next.js frontend
+│   ├── backend/      # Hono API server
+│   └── livekit/      # LiveKit server configuration
+├── packages/         # Shared packages (auth, db, ui)
+└── docker-compose.yml
+```
 
-### Video Calling
-
-### Team Collaboration
-
-### Contact Management
-
-### Meeting Scheduling
-
-### AI-Powered Features
-
-### Security & Privacy
-
-### Cross-Platform
-
-- **Web-based** - works on any modern browser
-- **Mobile responsive** design
-- **Progressive Web App** (PWA) support
-- **Offline capabilities** for basic features
-
----
-
-## Tech Stack
-
-### Frontend
-
-- **Next.js 15** - React framework with App Router
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
-- **shadcn/ui** - Beautiful component library
-- **Mediasoup-SFU** - Scalable Selective Forwarding Unit for real-time audio/video conferencing
-- **React Query** - Server state management
-- **Zustand** - For Distributed state management
-
-### Backend
-
-- **Hono** - Fast web framework
-- **PostgreSQL** - Reliable database
-- **Drizzle ORM** - Type-safe database queries
-- **Better Auth** - Authentication system
-
-### Infrastructure
-
-- **Turborepo** - Monorepo build system
-- **Docker** - Containerization
-- **Vercel** - Deployment platform
-- **Rate Limiting** - API protection
-
----
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Node.js** 20 or higher
-- **pnpm** package manager
-- **Docker** and Docker Compose
-- **Git**
-- **Microsoft Visual C++ Redistributable for Visual Studio 2022** (For Windows)
+- Docker and Docker Compose
+- Node.js 20+ (for local development)
+- pnpm (package manager)
 
-### Installation
+### Environment Setup
 
-1. **Clone the repository**
+1. **Copy environment variables:**
 
    ```bash
-   git clone https://github.com/joincalldotco/call.git
-   cd call
+   cp .env.example .env
    ```
 
-2.1 **Start the development environment**
+2. **Update your `.env` file with:**
+
+   ```env
+   # Database
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5434/call
+
+   # LiveKit Configuration
+   LIVEKIT_API_KEY=devkey
+   LIVEKIT_API_SECRET=your-generated-secret-key
+   LIVEKIT_URL=ws://localhost:7880
+   NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880
+   NEXT_PUBLIC_USE_LIVEKIT=true
+
+   # Clerk Authentication
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-key
+   CLERK_SECRET_KEY=your-clerk-secret
+   CLERK_WEBHOOK_SECRET=your-clerk-webhook-secret
+
+   # Redis
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   ```
+
+### Development
+
+**Using Docker (Recommended):**
 
 ```bash
-./setup-dev.sh
-```
+# Start all services
+docker-compose up --build -d
 
-2.2 **Start the development environment (Windows)**
-
-```bash
-./setup_dev_windows.sh
-```
-
-This script will automatically:
-
-- Create a `.env` file if it doesn't exist
-- Install dependencies if needed
-- Start Docker services (PostgreSQL)
-- Wait for the database to be ready
-- Start the development environment
-
-> **Note:** If you encounter any issues during setup, check the [ERRORS.md](ERRORS.md) file for troubleshooting guidance.
-
-3. **Open your browser**
-   - Web app: http://localhost:3000
-   - Server: http://localhost:1284
-
-### Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```env
-# Database Configuration
-DATABASE_URL=postgresql://postgres:postgres@localhost:5434/call
-
-# Google OAuth (for authentication)
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-# Email Configuration (for notifications)
-EMAIL_FROM=your_email@domain.com
-RESEND_API_KEY=your_resend_api_key
-
-# App URLs
-FRONTEND_URL=http://localhost:3000
-BACKEND_URL=http://localhost:1284
-
-# App Configuration
-NODE_ENV=development
-
-
-go to https://www.better-auth.com/docs/installation and click on 'Generate Secret'.
-
-BETTER_AUTH_SECRET=your_generated_secret
-```
-
-### Docker Services
-
-The project uses Docker Compose to run PostgreSQL:
-
-```bash
-# Start services
-pnpm docker:up
+# View logs
+docker-compose logs -f
 
 # Stop services
-pnpm docker:down
-
-# Clean up (removes volumes)
-pnpm docker:clean
+docker-compose down
 ```
 
----
+**Local Development:**
 
-## Project Structure
+```bash
+# Install dependencies
+pnpm install
 
-```
-call/
-├── apps/                    # Applications
-│   ├── web/                # Next.js web application
-│   │   ├── app/           # App Router pages
-│   │   │   ├── (app)/     # Main app routes
-│   │   │   ├── (auth)/    # Authentication routes
-│   │   │   └── (waitlist)/ # Landing page
-│   │   ├── components/    # React components
-│   │   ├── lib/          # Utilities and configs
-│   │   └── public/       # Static assets
-│   └── server/            # Hono backend API
-│       ├── routes/        # API routes
-│       ├── config/        # Server configuration
-│       ├── utils/         # Server utilities
-│       └── validators/    # Request validation
-├── packages/               # Shared packages
-│   ├── auth/              # Authentication utilities
-│   ├── db/                # Database schemas and migrations
-│   ├── ui/                # Shared UI components (shadcn/ui)
-│   ├── eslint-config/     # ESLint configuration
-│   └── typescript-config/ # TypeScript configuration
-├── docker-compose.yml      # Docker services
-├── setup-dev.sh             # Development setup script
-└── turbo.json             # Turborepo configuration
+# Start development servers
+pnpm dev
 ```
 
----
+### Access Points
 
-## Development
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:1285
+- **LiveKit**: ws://localhost:7880
+- **PostgreSQL**: localhost:5434
+- **Redis**: localhost:6379
 
-### Available Scripts
+## 🛠️ Development
+
+### Project Structure
+
+- **Frontend** (`services/web/`): Next.js application with LiveKit integration
+- **Backend** (`services/backend/`): Hono API server with authentication and call management
+- **Packages** (`packages/`): Shared utilities, database schemas, and UI components
+
+### Key Features
+
+- **LiveKit Integration**: Modern WebRTC solution for video/audio calls
+- **Dual Support**: Can run both Mediasoup and LiveKit (feature flag controlled)
+- **Team Management**: Create teams, invite members, manage contacts
+- **Call History**: Track and manage call sessions
+- **Real-time Notifications**: WebSocket-based notifications
+- **Responsive Design**: Mobile-first, accessible UI
+
+### Scripts
 
 ```bash
 # Development
-pnpm dev                    # Start all applications
-pnpm dev --filter web      # Start only web app
-pnpm dev --filter server   # Start only server
-
-# Building
-pnpm build                 # Build all packages
-pnpm build --filter web    # Build only web app
-
-# Linting & Formatting
-pnpm lint                  # Lint all packages
-pnpm lint:fix             # Fix linting issues
-pnpm format               # Check formatting
-pnpm format:fix           # Fix formatting
-
-# Database
-pnpm db:generate          # Generate database types
-pnpm db:migrate           # Run database migrations
-pnpm db:push              # Push schema changes
-pnpm db:studio            # Open database studio
+pnpm dev                 # Start all services
+pnpm dev:web            # Start only frontend
+pnpm dev:backend        # Start only backend
 
 # Docker
-pnpm docker:up            # Start Docker services
-pnpm docker:down          # Stop Docker services
-pnpm docker:clean         # Clean up Docker volumes
+pnpm docker:up          # Start Docker services
+pnpm docker:down        # Stop Docker services
+pnpm docker:clean       # Clean Docker volumes
+
+# Database
+pnpm db:generate        # Generate database migrations
+pnpm db:migrate         # Run database migrations
 ```
 
-### Package Management
+## 🔧 Configuration
 
-We use pnpm workspaces to manage this monorepo:
+### LiveKit Setup
+
+1. **Generate API Secret:**
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+2. **Update environment variables** with your generated secret
+
+3. **Configure LiveKit** in `services/livekit/livekit.yaml`
+
+### Clerk Authentication
+
+1. Create a Clerk account at [clerk.com](https://clerk.com)
+2. Create a new application
+3. Copy your keys to the `.env` file
+
+## 🚀 Deployment
+
+### Docker Production
 
 ```bash
-# Install a dependency in a specific workspace
-pnpm add <package> --filter <workspace-name>
+# Build production images
+docker-compose -f docker-compose.prod.yml build
 
-# Install a dependency in all workspaces
-pnpm add -w <package>
-
-# Link a local package in another workspace
-pnpm add @call/<package-name> --filter <workspace-name> --workspace
+# Deploy
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Development Workflow
+### Environment Variables
 
-1. **Create a feature branch**
+Ensure all required environment variables are set in your production environment:
 
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+- Database connection string
+- LiveKit API keys and URL
+- Clerk authentication keys
+- Redis connection details
+- Email service configuration
 
-2. **Make your changes** following our coding standards
+## 📚 Documentation
 
-3. **Run checks before committing**
+- [LiveKit Migration Guide](LIVEKIT_MIGRATION_SETUP.md)
+- [Testing Plan](TESTING_PLAN.md)
+- [Migration Summary](MIGRATION_SUMMARY.md)
 
-   ```bash
-   pnpm lint      # Lint all packages
-   pnpm build     # Build all packages
-   ```
+## 🤝 Contributing
 
-4. **Commit your changes** using conventional commits:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-   ```
-   feat: add new feature
-   fix: resolve bug
-   docs: update documentation
-   chore: update dependencies
-   refactor: improve code structure
-   test: add tests
-   ui: for ui changes
-   ```
+## 📄 License
 
-5. **Push and create a pull request**
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### Package Organization
+## 🙏 Acknowledgments
 
-- Place shared code in `packages/`
-- Keep applications in `apps/`
-- Use consistent naming conventions:
-  - Applications: `@call/app-name`
-  - Packages: `@call/package-name`
-
-### Code of Conduct
-
-This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
-
----
-
-## Acknowledgments
-
-- **All contributors** who help make Call better every day
-
-## Support
-
-- **Discord**: [Join our community](https://discord.com/invite/bre4echNxB)
-- **Email**: attiyassr@gmail.com
-- **Twitter**: [@joincalldotco](https://x.com/joincalldotco)
-
----
-
-Made with ❤️ by the Call team
-
-[Website](https://joincall.co) • [GitHub](https://github.com/Call0dotco/call) • [Discord](https://discord.com/invite/bre4echNxB) • [Twitter](https://x.com/joincalldotco)
+- [LiveKit](https://livekit.io/) for WebRTC infrastructure
+- [Next.js](https://nextjs.org/) for the React framework
+- [Hono](https://hono.dev/) for the API framework
+- [Clerk](https://clerk.com/) for authentication
+- [Tailwind CSS](https://tailwindcss.com/) for styling
